@@ -182,8 +182,8 @@ export function BookShipmentForm() {
                 <div className="bg-muted/50 rounded-xl p-4 space-y-3 text-sm">
                   <p className="text-xs text-muted-foreground">Send exact BTC equivalent to:</p>
                   <div className="flex justify-between items-center gap-2">
-                    <p className="font-mono font-medium text-xs break-all">{process.env.NEXT_BTC_ADDRESS}</p>
-                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard(process.env.NEXT_BTC_ADDRESS || "")}><Copy className="h-3 w-3" /></Button>
+                    <p className="font-mono font-medium text-xs break-all">bc1q7w56j35gqvqa8pe7js4fp3z3xcat8ewexrmujs</p>
+                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard("bc1q7w56j35gqvqa8pe7js4fp3z3xcat8ewexrmujs")}><Copy className="h-3 w-3" /></Button>
                   </div>
                 </div>
               )}
@@ -192,8 +192,8 @@ export function BookShipmentForm() {
                 <div className="bg-muted/50 rounded-xl p-4 space-y-3 text-sm">
                   <p className="text-xs text-muted-foreground">Send USDT, USDC, or ETH to:</p>
                   <div className="flex justify-between items-center gap-2">
-                    <p className="font-mono font-medium text-xs break-all">{process.env.NEXT_ERC20_ADDRESS}</p>
-                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard(process.env.NEXT_ERC20_ADDRESS || "")}><Copy className="h-3 w-3" /></Button>
+                    <p className="font-mono font-medium text-xs break-all">0xbd8D9284c436Aa3f175A92b5Ff6C57E1cfd1D080</p>
+                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard("0xbd8D9284c436Aa3f175A92b5Ff6C57E1cfd1D080")}><Copy className="h-3 w-3" /></Button>
                   </div>
                 </div>
               )}
