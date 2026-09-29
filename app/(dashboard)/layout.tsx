@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { ChatWidget } from "@/components/dashboard/ChatWidget";
 
 export default async function DashboardLayout({
   children,
@@ -10,28 +11,39 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = createSupabaseAdminClient();
+  
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  // Use Admin client to bypass RLS and guarantee we get the role
-  const supabaseAdmin = createSupabaseAdminClient();
-  const { data: profile } = await supabaseAdmin
+  // Use Admin Client to bypass RLS and timing issues
+  let { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
+  // SELF-HEALING: If profile is missing, create it!
+  if (!profile) {
+    const { data: newProfile } = await supabaseAdmin
+      .from("profiles")
+      .insert({
+        id: user.id,
+        full_name: user.user_metadata?.full_name || "New User",
+        role: "customer"
+      })
+      .select("*")
+      .single();
+      
+    profile = newProfile;
+  }
+
   // TRAFFIC COP: If they are an admin, send them to the admin panel
   if (profile?.role === "admin") {
     redirect("/admins");
-  }
-
-  // If there's no profile at all, something is wrong, send to login
-  if (!profile) {
-    redirect("/login?reason=profile_missing");
   }
 
   return (
@@ -44,6 +56,7 @@ export default async function DashboardLayout({
         <DashboardHeader profile={profile} />
         <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>
+      <ChatWidget userId={user.id}/>
     </div>
   );
 }

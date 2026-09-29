@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DashboardSidebar } from "./DashboardSidebar";
+import { NotificationBell } from "../shared/NotificationBell";
+import { ProfileDropdown } from "../shared/ProfileDropdown";
 
 export function DashboardHeader({ profile }: { profile: any }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,14 +36,9 @@ export function DashboardHeader({ profile }: { profile: any }) {
       </div>
       
       <div className="ml-auto flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent"></span>
-        </Button>
+        <NotificationBell/>
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-            {profile?.full_name?.charAt(0).toUpperCase() || "U"}
-          </div>
+          <ProfileDropdown profile={profile} role="customer"/>
         </div>
       </div>
     </header>

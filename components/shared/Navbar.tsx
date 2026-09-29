@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import { Translator } from "@/components/shared/Translator";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -53,6 +54,9 @@ export function Navbar() {
           <Link href="/login">
             <Button variant="ghost" className="text-primary-foreground hover:bg-white/10 hover:text-accent">Sign In</Button>
           </Link>
+          <div className="hidden md:flex items-center gap-2">
+            <Translator />
+          </div>
           <Link href="/quote">
             <Button className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full">
               Get a Quote

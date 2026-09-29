@@ -28,8 +28,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     setError(null);
 
     try {
-      if (isSignup) {
-        const { error } = await supabase.auth.signUp({
+       if (isSignup) {
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -40,10 +40,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         });
         if (error) throw error;
         
-        router.push("/dashboard");
+        // Redirect to verify page with email in URL
+        router.push(`/verify?email=${encodeURIComponent(email)}`);
         router.refresh();
       } else {
-        // 1. Just sign them in. Don't check the role here.
+        // 1. Just sign them in.
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -52,7 +53,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
         // 2. Send everyone to /dashboard. The server layout will redirect admins.
         router.push("/dashboard");
-        router.refresh();
+        router.refresh(); // Crucial: tells the server to fetch the new cookie
       }
     } catch (err: any) {
       setError(err.message);

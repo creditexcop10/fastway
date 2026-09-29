@@ -9,6 +9,7 @@ export default async function AdminUsersPage() {
   const { data: users } = await supabaseAdmin
     .from("profiles")
     .select("*")
+    .neq("role", "admin")
     .order("created_at", { ascending: false });
 
   return (

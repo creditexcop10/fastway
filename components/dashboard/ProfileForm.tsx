@@ -6,15 +6,26 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { Loader2, Save } from "lucide-react"
+import { toast } from "sonner"
 
 export function ProfileForm({ profile }: { profile: any }) {
   const [isSaving, setIsSaving] = useState(false)
+  const [fullName, setFullName] = useState(profile?.full_name || "")
+  const [phone, setPhone] = useState(profile?.phone || "")
+  const [company, setCompany] = useState(profile?.company_name || "")
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSaving(true)
     const formData = new FormData(e.currentTarget)
+    
+    // manually append in case state hasn't fully synced to form data yet
+    formData.set("full_name", fullName)
+    formData.set("phone", phone)
+    formData.set("company_name", company)
+
     await updateProfile(formData)
+    toast.success("Profile updated successfully!")
     setIsSaving(false)
   }
 
@@ -25,8 +36,9 @@ export function ProfileForm({ profile }: { profile: any }) {
         <Input 
           id="full_name" 
           name="full_name" 
-          defaultValue={profile?.full_name || ""} 
           required 
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
         />
       </div>
 
@@ -36,7 +48,8 @@ export function ProfileForm({ profile }: { profile: any }) {
           id="phone" 
           name="phone" 
           type="tel" 
-          defaultValue={profile?.phone || ""} 
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
         />
       </div>
 
@@ -45,7 +58,8 @@ export function ProfileForm({ profile }: { profile: any }) {
         <Input 
           id="company_name" 
           name="company_name" 
-          defaultValue={profile?.company_name || ""} 
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
         />
       </div>
 

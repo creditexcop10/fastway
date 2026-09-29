@@ -10,14 +10,15 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = createSupabaseAdminClient();
+  
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  // Use Admin client to bypass RLS
-  const supabaseAdmin = createSupabaseAdminClient();
+  // Use Admin Client to bypass RLS
   const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("role, full_name")
@@ -25,9 +26,10 @@ export default async function AdminLayout({
     .single();
 
   if (!profile) {
-    redirect("/login?reason=session_expired");
+    redirect("/login?reason=profile_missing");
   }
 
+  // TRAFFIC COP: If they are NOT an admin, send them to the user dashboard
   if (profile.role !== "admin") {
     redirect("/dashboard");
   }
