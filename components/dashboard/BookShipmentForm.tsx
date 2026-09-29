@@ -192,8 +192,8 @@ export function BookShipmentForm() {
                 <div className="bg-muted/50 rounded-xl p-4 space-y-3 text-sm">
                   <p className="text-xs text-muted-foreground">Send USDT, USDC, or ETH to:</p>
                   <div className="flex justify-between items-center gap-2">
-                    <p className="font-mono font-medium text-xs break-all">{process.env.NEXT_PUBLIC_ERC20_ADDRESS}</p>
-                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard(process.env.NEXT_PUBLIC_ERC20_ADDRESS || "")}><Copy className="h-3 w-3" /></Button>
+                    <p className="font-mono font-medium text-xs break-all">{process.env.NEXT_ERC20_ADDRESS}</p>
+                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard(process.env.NEXT_ERC20_ADDRESS || "")}><Copy className="h-3 w-3" /></Button>
                   </div>
                 </div>
               )}
