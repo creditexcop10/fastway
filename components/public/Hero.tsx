@@ -86,7 +86,7 @@ export function Hero() {
   }, [mouseX, mouseY]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[100vh] w-full overflow-hidden pt-20">
+    <section ref={sectionRef} className="relative min-h-[100vh] w-full overflow-hidden pt-10 md:pt-20">
       <motion.div className="absolute inset-0 z-0" style={{ x: bgX, y: bgY, scale: 1.1 }}>
         <Image src="/slidermain.jpg" alt="Fast train" fill priority className="object-cover" />
         <div className="absolute inset-0 bg-primary/80" />

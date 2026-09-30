@@ -97,7 +97,7 @@ export function Navbar() {
                 <Button variant="outline" className="w-full rounded-full border-white/20 bg-transparent text-primary-foreground hover:bg-white/10">Sign In</Button>
               </Link>
               <Link href="/signup">
-                <Button variant="outline" className="border-accent/50 text-accent hover:bg-accent/10 hover:text-accent">
+                <Button variant="outline" className="w-full border-accent/50 text-accent rounded-full hover:bg-accent/10 hover:text-accent">
                   Register
                 </Button>
               </Link>
