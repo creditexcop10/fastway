@@ -25,10 +25,21 @@ export async function createShipment(formData: FormData) {
   const newShipment = {
     user_id: user.id,
     tracking_number: trackingNumber,
+    
+    // Sender Info
+    sender_name: formData.get("sender_name") as string,
+    sender_email: formData.get("sender_email") as string,
+    sender_phone: formData.get("sender_phone") as string,
+    sender_country: formData.get("sender_country") as string,
+    nearest_airport: formData.get("nearest_airport") as string,
     origin_address: formData.get("origin_address") as string,
+    
+    // Delivery Info
     destination_address: formData.get("destination_address") as string,
     freight_type: formData.get("freight_type") as string,
     weight: parseFloat(formData.get("weight") as string),
+    
+    // Payment & Status
     status: "pending", 
     total_cost: parseFloat(formData.get("total_cost") as string) || 0,
     payment_method: formData.get("payment_method") as string,

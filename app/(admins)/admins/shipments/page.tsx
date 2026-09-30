@@ -3,7 +3,6 @@ import { UpdateStatusForm } from "@/components/admin/UpdateStatusForm";
 import { confirmPayment } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DeleteShipmentButton } from "@/components/admin/DeleteShipmentButton";
 
 export default async function AdminShipmentsPage() {
   const supabaseAdmin = createSupabaseAdminClient();
@@ -25,10 +24,13 @@ export default async function AdminShipmentsPage() {
 
       <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[1000px]">
             <thead className="bg-muted/50 border-b">
               <tr>
                 <th className="text-left p-4 font-medium text-muted-foreground">Customer</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Sender Name</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Sender Phone</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Nearest Airport</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Tracking #</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Cost</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Pay Method</th>
@@ -36,7 +38,6 @@ export default async function AdminShipmentsPage() {
                 <th className="text-left p-4 font-medium text-muted-foreground">Pay Status</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Ship Status</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Update</th>
-                <th className="text-left p-4 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -49,6 +50,9 @@ export default async function AdminShipmentsPage() {
                   return (
                     <tr key={shipment.id} className="border-b last:border-0 hover:bg-muted/30">
                       <td className="p-4 font-medium">{customerName || "Unknown"}</td>
+                      <td className="p-4">{shipment.sender_name || "N/A"}</td>
+                      <td className="p-4">{shipment.sender_phone || "N/A"}</td>
+                      <td className="p-4 font-medium">{shipment.nearest_airport || "N/A"}</td>
                       <td className="p-4 font-mono text-primary">{shipment.tracking_number}</td>
                       <td className="p-4 font-bold">${shipment.total_cost || "0.00"}</td>
                       <td className="p-4 uppercase text-xs">{shipment.payment_method || "N/A"}</td>
@@ -73,9 +77,6 @@ export default async function AdminShipmentsPage() {
                         </span>
                       </td>
                       <td className="p-4">
-                      <DeleteShipmentButton shipmentId={shipment.id} />
-                    </td>
-                      <td className="p-4">
                         <UpdateStatusForm shipmentId={shipment.id} currentStatus={shipment.status} />
                       </td>
                     </tr>
@@ -83,7 +84,7 @@ export default async function AdminShipmentsPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                  <td colSpan={11} className="p-8 text-center text-muted-foreground">
                     No shipments in the system yet.
                   </td>
                 </tr>
