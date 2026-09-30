@@ -27,10 +27,12 @@ export default function SignupPage() {
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     setLoading(true);
+
+    const cleanEmail = values.email.trim().toLowerCase();
     
     // 1. Create the user in Supabase
     const { error } = await supabase.auth.signUp({
-      email: values.email,
+      email: cleanEmail,
       password: values.password,
       options: {
         data: { full_name: values.full_name }
@@ -50,7 +52,7 @@ export default function SignupPage() {
     const res = await fetch("/api/send-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: values.email }),
+      body: JSON.stringify({ email: cleanEmail }),
     });
 
     if (!res.ok) {
@@ -60,7 +62,7 @@ export default function SignupPage() {
     }
 
     // 4. Store email and password temporarily to log them in after verification
-    sessionStorage.setItem("verification_email", values.email);
+    sessionStorage.setItem("verification_email", cleanEmail);
     sessionStorage.setItem("verification_password", values.password);
     
     toast.success("Account created! Please enter the 6-digit code sent to your email.");

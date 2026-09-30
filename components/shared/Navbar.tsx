@@ -54,6 +54,11 @@ export function Navbar() {
           <Link href="/login">
             <Button variant="ghost" className="text-primary-foreground hover:bg-white/10 hover:text-accent">Sign In</Button>
           </Link>
+          <Link href="/signup">
+            <Button variant="outline" className="border-accent/50 text-accent hover:bg-accent/10 hover:text-accent">
+              Register
+            </Button>
+          </Link>
           <div className="hidden md:flex items-center gap-2">
             <Translator />
           </div>
@@ -90,6 +95,11 @@ export function Navbar() {
             <div className="flex flex-col gap-2 mt-4 pb-4">
               <Link href="/login">
                 <Button variant="outline" className="w-full rounded-full border-white/20 bg-transparent text-primary-foreground hover:bg-white/10">Sign In</Button>
+              </Link>
+              <Link href="/signup">
+                <Button variant="outline" className="border-accent/50 text-accent hover:bg-accent/10 hover:text-accent">
+                  Register
+                </Button>
               </Link>
               <Link href="/quote">
                 <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-full">
