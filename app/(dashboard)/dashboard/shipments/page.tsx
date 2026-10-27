@@ -32,7 +32,6 @@ export default async function MyShipmentsPage() {
                 <th className="text-left p-4 font-medium text-muted-foreground">Tracking #</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Origin</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Destination</th>
-                <th className="text-left p-4 font-medium text-muted-foreground">Cost</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Pay Status</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Ship Status</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Date</th>
@@ -45,7 +44,6 @@ export default async function MyShipmentsPage() {
                     <td className="p-4 font-mono font-medium text-primary">{shipment.tracking_number}</td>
                     <td className="p-4 max-w-[200px] truncate text-muted-foreground">{shipment.origin_address}</td>
                     <td className="p-4 max-w-[200px] truncate text-muted-foreground">{shipment.destination_address}</td>
-                    <td className="p-4 font-bold text-primary">${shipment.total_cost || "0.00"}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded-md text-xs capitalize font-medium ${
                         shipment.payment_status === 'paid' 
