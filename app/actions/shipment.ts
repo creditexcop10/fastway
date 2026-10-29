@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { sendBrevoEmail } from "@/lib/brevo"
+import { geocodeAddress } from "@/lib/geocode"
 
 export async function createShipment(formData: FormData): Promise<{ error?: string; tracking_number?: string }> {
   const supabase = await createSupabaseServerClient()
@@ -22,6 +23,19 @@ export async function createShipment(formData: FormData): Promise<{ error?: stri
 
   const trackingNumber = generateTrackingNumber()
 
+  const originAddress = formData.get("origin_address") as string
+  const destinationAddress = formData.get("destination_address") as string
+
+  // Geocode SEQUENTIALLY with airport fallback
+  const originCoords = await geocodeAddress(
+    originAddress, 
+    formData.get("sender_country") as string,
+    formData.get("nearest_airport") as string
+  );
+  
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  const destCoords = await geocodeAddress(destinationAddress);
   const newShipment = {
     user_id: user.id,
     tracking_number: trackingNumber,
@@ -32,14 +46,20 @@ export async function createShipment(formData: FormData): Promise<{ error?: stri
     sender_phone: formData.get("sender_phone") as string,
     sender_country: formData.get("sender_country") as string,
     nearest_airport: formData.get("nearest_airport") as string,
-    origin_address: formData.get("origin_address") as string,
+    origin_address: originAddress,
     
     // Delivery Info
-    destination_address: formData.get("destination_address") as string,
+    destination_address: destinationAddress,
     freight_type: formData.get("freight_type") as string,
     weight: parseFloat(formData.get("weight") as string),
     
-    // Payment (no cost calculation, but keep payment methods)
+    // Geocoded coordinates
+    origin_lat: originCoords?.lat || null,
+    origin_lng: originCoords?.lng || null,
+    destination_lat: destCoords?.lat || null,
+    destination_lng: destCoords?.lng || null,
+    
+    // Payment
     total_cost: 0,
     payment_method: formData.get("payment_method") as string,
     payment_hash: null,
@@ -69,7 +89,6 @@ export async function createShipment(formData: FormData): Promise<{ error?: stri
       <li><strong>Freight Type:</strong> ${newShipment.freight_type}</li>
       <li><strong>Weight:</strong> ${newShipment.weight} kg</li>
       <li><strong>Payment Method:</strong> ${newShipment.payment_method || "N/A"}</li>
-      <li><strong>TXN Hash:</strong> ${newShipment.payment_hash || "N/A"}</li>
     </ul>
   `;
 

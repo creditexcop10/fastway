@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2, Package, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { getTrackingDetails } from "@/app/actions/tracking";
+import { TrackingResult } from "./TrackingResult";
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -157,76 +158,16 @@ export function Hero() {
               </motion.div>
             )}
           </AnimatePresence>
-
           {/* Result Display */}
           <AnimatePresence>
             {result && (
               <motion.div 
-                className="mt-6 bg-background rounded-2xl border border-border overflow-hidden text-left"
+                className="mt-6 w-full"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
               >
-                {/* Header */}
-                <div className="bg-muted/50 p-4 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Tracking Number</p>
-                    <h4 className="font-mono font-bold text-primary text-lg">{result.shipment.tracking_number}</h4>
-                  </div>
-                  <span className="px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-bold uppercase">
-                    {result.shipment.status.replace("_", " ")}
-                  </span>
-                </div>
-
-                {/* Sender & Delivery Info */}
-                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-b">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Sender</p>
-                    <p className="text-sm font-medium text-primary">{result.shipment.sender_name || "N/A"}</p>
-                    <p className="text-xs text-muted-foreground">{result.shipment.sender_email}</p>
-                    <p className="text-xs text-muted-foreground">{result.shipment.sender_phone}</p>
-                    <p className="text-xs text-muted-foreground">{result.shipment.origin_address}</p>
-                    <p className="text-xs text-muted-foreground">{result.shipment.sender_country}</p>
-                    <p className="text-xs text-muted-foreground">Airport: {result.shipment.nearest_airport}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Delivery</p>
-                    <p className="text-sm font-medium text-primary">{result.shipment.destination_address}</p>
-                    <div className="flex gap-3 text-xs text-muted-foreground mt-2">
-                      <span className="px-2 py-0.5 rounded bg-muted capitalize">{result.shipment.freight_type} Freight</span>
-                      <span className="px-2 py-0.5 rounded bg-muted">{result.shipment.weight} kg</span>
-                    </div>
-                    <div className="mt-2">
-                      <span className={`text-xs px-2 py-0.5 rounded ${result.shipment.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'} capitalize`}>
-                        Payment: {result.shipment.payment_status || "pending"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Timeline */}
-                <div className="p-4">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-4">Shipment Progress</p>
-                  <div className="relative border-l-2 border-muted ml-2 space-y-6">
-                    {result.updates && result.updates.length > 0 ? (
-                      result.updates.map((update: any, index: number) => (
-                        <motion.div key={update.id} className="relative pl-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.1 }}>
-                          <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-background border-2 border-muted flex items-center justify-center">
-                            {getStatusIcon(update.status)}
-                          </div>
-                          <p className="font-semibold text-primary text-sm capitalize">{update.status.replace("_", " ")}</p>
-                          {update.location && <p className="text-xs text-muted-foreground">{update.location}</p>}
-                          <p className="text-xs text-muted-foreground">{update.description}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5" suppressHydrationWarning>{new Date(update.timestamp).toLocaleString()}</p>
-                        </motion.div>
-                      ))
-                    ) : (
-                      <div className="pl-6">
-                        <p className="text-sm text-muted-foreground">Shipment created. Awaiting pickup.</p>
-                        <p className="text-xs text-muted-foreground mt-1" suppressHydrationWarning>Booked on {new Date(result.shipment.created_at).toLocaleString()}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <TrackingResult shipment={result.shipment} updates={result.updates} />
               </motion.div>
             )}
           </AnimatePresence>
