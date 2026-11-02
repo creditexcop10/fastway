@@ -2,9 +2,10 @@
 
 import { motion, useAnimation } from "motion/react";
 import dynamic from "next/dynamic";
-import { MapPin, Package, Clock, CheckCircle2, User, Mail, Phone, Globe, Plane, Ship, Truck, Box } from "lucide-react";
+import { MapPin, Package, Clock, CheckCircle2, User, Mail, Phone, Globe, Plane, Ship, Truck, Box, DollarSign } from "lucide-react";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { toast } from "sonner";
 
 // Dynamically import the map (Leaflet doesn't work with SSR)
 const ShipmentMap = dynamic(() => import("./ShipmentMap").then(mod => mod.ShipmentMap), {
@@ -60,16 +61,12 @@ export function TrackingResult({ shipment, updates }: { shipment: any; updates: 
         { opacity: 1, y: 0, rotateX: 0, stagger: 0.05, duration: 0.8, ease: "back.out(1.7)" }
       );
     }
-    
     controls.start("show");
   }, [controls]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.3 }
-    }
+    show: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.3 } }
   };
 
   const itemVariants = {
@@ -89,6 +86,125 @@ export function TrackingResult({ shipment, updates }: { shipment: any; updates: 
       status: u.status
     }));
 
+  const isPaid = shipment.payment_status === "paid";
+  const hasPrice = shipment.total_cost > 0;
+
+  // ==========================================
+  // UNPAID VIEW: Payment Required / Awaiting Price
+  // ==========================================
+  if (!isPaid) {
+    return (
+      <motion.div
+        className="bg-background rounded-3xl shadow-2xl border border-border overflow-hidden text-left w-full"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        {/* Cinematic Header */}
+        <div className="bg-gradient-to-br from-primary to-primary/80 p-6 md:p-8 border-b relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-primary-foreground/60 uppercase tracking-widest mb-2">Tracking Number</p>
+              <h3 
+                ref={trackingRef} 
+                className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-primary-foreground font-mono break-all"
+                style={{ perspective: 1000 }}
+              >
+                {trackingChars.map((char: string, i: number) => (
+                  <span key={i} className="char inline-block">{char}</span>
+                ))}
+              </h3>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="px-4 py-2 rounded-full bg-yellow-500 text-white text-sm font-bold uppercase whitespace-nowrap shadow-lg">
+                {hasPrice ? "Payment Required" : "Awaiting Quote"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Required Body */}
+        <div className="p-6 md:p-8 space-y-6">
+          {hasPrice ? (
+            <>
+              <div className="text-center py-4">
+                <motion.div 
+                  className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 mb-4"
+                  initial={{ scale: 0 }} 
+                  animate={{ scale: 1 }} 
+                  transition={{ delay: 0.5, type: "spring" }}
+                >
+                  <DollarSign className="h-8 w-8 text-accent" />
+                </motion.div>
+                <h2 className="font-heading text-2xl font-bold text-primary mb-2">Payment Required</h2>
+                <p className="text-muted-foreground mb-4">Your shipment has been reviewed. Complete payment to activate live tracking.</p>
+                <p className="text-4xl font-bold text-accent">${shipment.total_cost.toFixed(2)}</p>
+              </div>
+
+              {/* Payment Instructions */}
+              <div className="bg-muted/30 rounded-2xl p-6 space-y-4">
+                <p className="text-sm font-bold text-primary">Send payment using your selected method:</p>
+                
+                {shipment.payment_method === "btc" && (
+                  <div className="bg-background border rounded-xl p-4 space-y-2">
+                    <p className="text-xs text-muted-foreground">BTC Address:</p>
+                    <div className="flex justify-between items-center gap-2">
+                      <p className="font-mono text-xs break-all">{process.env.NEXT_PUBLIC_BTC_ADDRESS}</p>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(process.env.NEXT_PUBLIC_BTC_ADDRESS || ""); toast.success("Address copied!"); }}
+                        className="text-accent text-xs hover:underline flex-shrink-0"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {shipment.payment_method === "erc20" && (
+                  <div className="bg-background border rounded-xl p-4 space-y-2">
+                    <p className="text-xs text-muted-foreground">ERC-20 Address (USDT, USDC, ETH):</p>
+                    <div className="flex justify-between items-center gap-2">
+                      <p className="font-mono text-xs break-all">{process.env.NEXT_PUBLIC_ERC20_ADDRESS}</p>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(process.env.NEXT_PUBLIC_ERC20_ADDRESS || ""); toast.success("Address copied!"); }}
+                        className="text-accent text-xs hover:underline flex-shrink-0"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground text-center">
+                  Once your payment is received and verified by our team, live tracking will be activated and you'll receive an email notification.
+                </p>
+              </div>
+            </>
+          ) : (
+            // Price not set yet
+            <div className="text-center py-8">
+              <motion.div 
+                className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/10 mb-4"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Clock className="h-8 w-8 text-yellow-500" />
+              </motion.div>
+              <h2 className="font-heading text-2xl font-bold text-primary mb-2">Awaiting Price Quote</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Your shipment has been received. Our team is reviewing the details and will send you a price quote shortly. 
+                Once payment is confirmed, live tracking will be activated.
+              </p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ==========================================
+  // PAID VIEW: Full Tracking Experience
+  // ==========================================
   return (
     <motion.div
       className="bg-background rounded-3xl shadow-2xl border border-border overflow-hidden text-left w-full"

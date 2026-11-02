@@ -80,58 +80,72 @@ export function ShipmentMap({ originLat, originLng, destLat, destLng, status, fr
   const origin: [number, number] = [originLat, originLng];
   const destination: [number, number] = [destLat, destLng];
 
-  // Build the full route: origin → checkpoints → destination
-  const routePoints: [number, number][] = [origin];
-  
-  // Add valid checkpoints (with coords)
+  // Filter valid checkpoints (with coords), already sorted desc by timestamp
   const validCheckpoints = checkpoints.filter(cp => cp.lat && cp.lng);
-  validCheckpoints.forEach(cp => {
-    routePoints.push([cp.lat, cp.lng]);
-  });
-  routePoints.push(destination);
 
-  // Vehicle position: the LAST checkpoint if available, otherwise estimated
+  // ===== FIXED VEHICLE POSITION LOGIC =====
+  // Status takes priority over checkpoint position
   let vehiclePos: [number, number];
-  
-  if (validCheckpoints.length > 0) {
-    // Vehicle is at the most recent checkpoint
-    const lastCheckpoint = validCheckpoints[0]; // Already sorted desc by timestamp
-    vehiclePos = [lastCheckpoint.lat, lastCheckpoint.lng];
+
+  if (status === "delivered") {
+    // Delivered → vehicle is at destination, no matter what
+    vehiclePos = destination;
+  } else if (status === "pending" || status === "cancelled") {
+    // Pending → vehicle is at origin
+    vehiclePos = origin;
+  } else if (validCheckpoints.length > 0) {
+    // Has checkpoints → use the most recent one
+    vehiclePos = [validCheckpoints[0].lat, validCheckpoints[0].lng];
   } else {
-    // Estimate based on status
+    // No checkpoints → estimate based on status
     const progressMap: Record<string, number> = {
-      pending: 0,
       picked_up: 0.15,
       in_transit: 0.5,
       out_for_delivery: 0.85,
-      delivered: 1,
-      cancelled: 0,
     };
-    const progress = progressMap[status] ?? 0;
+    const progress = progressMap[status] ?? 0.15;
     vehiclePos = [
       origin[0] + (destination[0] - origin[0]) * progress,
       origin[1] + (destination[1] - origin[1]) * progress,
     ];
   }
 
+  // Build the full route: origin → checkpoints (reversed to chronological) → destination
+  const routePoints: [number, number][] = [origin];
+  const chronologicalCheckpoints = [...validCheckpoints].reverse();
+  chronologicalCheckpoints.forEach(cp => {
+    routePoints.push([cp.lat, cp.lng]);
+  });
+  routePoints.push(destination);
+
+  // All positions for fit bounds
   const allPositions = [...routePoints, vehiclePos];
 
-  // Route segments for drawing
-  // Completed route (up to vehicle): green/orange
-  // Remaining route: dashed gray
+  // Split route into completed and remaining based on vehicle position
   const completedRoute: [number, number][] = [];
   const remainingRoute: [number, number][] = [];
 
-  let foundVehicle = false;
-  for (let i = 0; i < routePoints.length - 1; i++) {
-    if (foundVehicle) {
-      remainingRoute.push(routePoints[i], routePoints[i + 1]);
-    } else {
+  // Find where the vehicle is in the route
+  let vehicleIndex = -1;
+  for (let i = 0; i < routePoints.length; i++) {
+    if (routePoints[i][0] === vehiclePos[0] && routePoints[i][1] === vehiclePos[1]) {
+      vehicleIndex = i;
+      break;
+    }
+  }
+
+  if (vehicleIndex === -1) {
+    // Vehicle is between points — draw everything as completed up to the closest point
+    completedRoute.push(origin, vehiclePos);
+    remainingRoute.push(vehiclePos, destination);
+  } else {
+    // Draw completed route up to vehicle
+    for (let i = 0; i < vehicleIndex; i++) {
       completedRoute.push(routePoints[i], routePoints[i + 1]);
-      // Check if vehicle is at this point
-      if (routePoints[i + 1][0] === vehiclePos[0] && routePoints[i + 1][1] === vehiclePos[1]) {
-        foundVehicle = true;
-      }
+    }
+    // Draw remaining route from vehicle to destination
+    for (let i = vehicleIndex; i < routePoints.length - 1; i++) {
+      remainingRoute.push(routePoints[i], routePoints[i + 1]);
     }
   }
 
